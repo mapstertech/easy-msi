@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "easy-msi"
+version = "0.1.0"
+authors = ["Victor Temprano <victor@mapster.me>"]
+description = "As the name suggests, a simple interface to make multi-spectral imaging easy for academics."
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/mapstertech/easy-msi"
+repository = "https://github.com/mapstertech/easy-msi"
+keywords = ["msi","multi-spectral imaging"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+customtkinter = "^5.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
