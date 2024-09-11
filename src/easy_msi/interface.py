@@ -7,7 +7,7 @@ from PIL import Image
 
 from constants import Constants
 from settings import Settings
-from project import Project
+from models import Project
 from files import Files
 
 files = Files()
@@ -25,6 +25,7 @@ class Interface:
         self.navigation_frame.columnconfigure(0, { 'minsize':300 })
         self.display_frame = ctk.CTkFrame(self.root, corner_radius=0, fg_color="transparent")
         self.delete_image = ctk.CTkImage(Image.open(os.path.join(constants.basedir, "assets", "trash-icon.png")), size=(20, 20))
+        self.arrow_image = ctk.CTkImage(Image.open(os.path.join(constants.basedir, "assets", "white-right-arrow.png")), size=(20, 20))
 
     def defaults(self):
         # CTK theme
@@ -90,7 +91,7 @@ class Interface:
             name_entry.grid(column=0, row=0)
             name_entry.place(anchor=NW)
             # Label with path
-            path_label_text = app_settings.projects[app_settings.current_project].path + " (" + str(files.tifs_in_folder(app_settings.projects[app_settings.current_project].path)) + " TIF images)"
+            path_label_text = app_settings.projects[app_settings.current_project].path + " (" + str(files.number_tifs_in_folder(app_settings.projects[app_settings.current_project].path)) + " TIF images)"
             path_label = ctk.CTkLabel(self.display_frame, text=path_label_text, fg_color="transparent")
             path_label.grid(column=0, row=1, sticky="w")
             # Delete button
@@ -104,15 +105,47 @@ class Interface:
             tabview.grid(row=2, column=0, padx=(10, 10), pady=(20, 0), columnspan=3, sticky="we")
             # Resize tab
             tabview.add(constants.resize_tab_title)
+            tabview.tab(constants.resize_tab_title).grid_columnconfigure(0, weight=1)
+            resize_files_frame = ctk.CTkFrame(tabview.tab(constants.resize_tab_title), corner_radius=0)
             resize_instructions = ctk.CTkLabel(
-                tabview.tab(constants.resize_tab_title),
+                resize_files_frame,
                 justify="left",
                 wraplength=self.display_frame.winfo_width() - 250,
                 text=constants.resize_tab_description
             )
             resize_instructions.place(anchor=NW)
-            resize_instructions.grid(sticky="we")
-            tabview.tab(constants.resize_tab_title).grid_columnconfigure(0, weight=1)
+            resize_instructions.grid(row=0, column=0, columnspan=3, sticky="we")
+            # List of files
+            original_files_header = ctk.CTkLabel(
+                resize_files_frame,
+                justify="left",
+                font=ctk.CTkFont(size=15, weight="bold"),
+                text="Original Files"
+            )
+            original_files_header.place(anchor=W)
+            original_files_header.grid(row=1, column=0, sticky="w")
+            for idx, file in enumerate(files.tifs_in_folder(app_settings.projects[app_settings.current_project].path)):
+                file_details = ctk.CTkLabel(
+                    tabview.tab(constants.resize_tab_title),
+                    justify="left",
+                    text_color="#CCCCCC",
+                    text=file.name + " (" + str(round(file.size/1000000, 2)) + " MB)"
+                )
+                file_details.place(anchor=W)
+                file_details.grid(row=idx + 2, column=0, sticky="w")
+                print(file)
+            # Resize button
+            resize_button = ctk.CTkButton(tabview.tab(constants.resize_tab_title), text=" Resize", height=30, width=50, image=self.arrow_image, command=self.remove_project)
+            resize_button.grid(row=0, column=0)
+            # List of new files
+            new_files_header = ctk.CTkLabel(
+                tabview.tab(constants.resize_tab_title),
+                justify="left",
+                font=ctk.CTkFont(size=15, weight="bold"),
+                text="Resized Files"
+            )
+            new_files_header.place(anchor=W)
+            new_files_header.grid(row=1, column=2, sticky="w")
             # Process tab
             tabview.add(constants.process_tab_title)
             tabview.add(constants.select_tab_title)

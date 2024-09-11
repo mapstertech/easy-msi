@@ -2,6 +2,10 @@
 
 Built to make multi-spectral imaging easy for beginner scholars getting image files in large chunks. This application is built to minimize complexity and computing power, and to maximize ease of use for scholars.
 
+## Dev
+
+- Run with `python .\src\easy_msi\__main__.py`
+
 ## Packaging
 
 - Core code with Python

@@ -17,7 +17,7 @@ class Constants:
         self.delete_title = "Confirm Deletion"
         self.delete_description = "Are you sure you want to remove this project? This can't be undone."
         self.resize_tab_title = "1. Resize"
-        self.resize_tab_description = "This will resize your images so they can be processed more quickly and easily."
+        self.resize_tab_description = "This will resize your images so they can be processed more quickly and easily on a first pass. You can redo with more detail later."
         self.process_tab_title = "2. Process"
         self.process_tab_description = "2. Process"
         self.select_tab_title = "3. Select"
