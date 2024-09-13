@@ -39,12 +39,12 @@ class Packager {
 
       package: [
         `--src ${path('../dist/linux/app-linux-x64/')}`,
-        'electron-react-python-template',
+        'easy-msi',
         `--dest ${path('../dist/linux/setup')}`,
         '--arch amd64',
         `--icon ${path('../utilities/deb/images/icon.ico')}`,
         `--background ${path('../utilities/deb/images/background.png')}`,
-        '--title "Example app"',
+        '--title "Easy MSI"',
         '--overwrite'
       ].join(' '),
 
@@ -80,11 +80,11 @@ class Packager {
 
       package: [
         path('../dist/mac/app-darwin-x64/app.app'),
-        'electron-react-python-template',
+        'easy-msi',
         `--out=${path('../dist/mac/setup')}`,
         `--icon=${path('../utilities/dmg/images/icon.icns')}`,
         `--background=${path('../utilities/dmg/images/background.png')}`,
-        '--title="Example app"',
+        '--title="Easy MSI"',
         '--overwrite'
       ].join(' '),
 
@@ -132,10 +132,10 @@ class Packager {
     const msiCreator = new MSICreator({
       appDirectory: path('../dist/windows/app-win32-x64'),
       appIconPath: path('../utilities/msi/images/icon.ico'),
-      description: 'Example app',
+      description: 'Easy MSI helps get scholars working with multi-spectral imaging.',
       exe: 'app',
-      manufacturer: 'Example Manufacturer',
-      name: 'electron-react-python-template',
+      manufacturer: 'Mapster Technology Inc.',
+      name: 'easy-msi',
       outputDirectory: path('../dist/windows/setup'),
       ui: {
         chooseDirectory: true,

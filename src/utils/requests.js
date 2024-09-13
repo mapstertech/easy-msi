@@ -39,7 +39,7 @@ export const post = (
   errorCallback
 ) => {
   fetch(`http://localhost:${port}/${route}`, {
-    body,
+    body : body,
     method: 'POST',
     headers: { 'Content-type': 'application/json' }
   })

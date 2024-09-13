@@ -29,6 +29,7 @@ class Starter {
 
     // Kill anything that might using required React port
     spawnSync('npx kill-port 3000', spawnOptions.hideLogs);
+    spawnSync('npx kill-port 3001', spawnOptions.hideLogs);
 
     // Start & identify React & Electron processes
     spawn('cross-env BROWSER=none react-scripts start', spawnOptions.showLogs);

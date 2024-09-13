@@ -1,5 +1,4 @@
 import React, { Fragment, useEffect } from 'react';
-import { get } from 'utils/requests';
 import { Container, Row, Col } from 'react-bootstrap';
 
 import Titlebar from 'components/Titlebar/Titlebar';
@@ -44,7 +43,7 @@ function App() {
           <Col className="projects" xs={3}>
             <Projects />
           </Col>
-          <Col xs={9}>
+          <Col className="workspace" xs={9}>
             <Workspace />
           </Col>
         </Row>

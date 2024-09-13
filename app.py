@@ -1,3 +1,4 @@
+import os
 import sys
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -26,12 +27,20 @@ if "app.py" in sys.argv[0]:
 """
 --------------------------- REST CALLS -----------------------------
 """
-# Remove and replace with your own
-@app.route("/example")
-def example():
-
-  # See /src/components/App.js for frontend call
-  return jsonify("Example response from Flask! Learn more in /app.py & /src/components/App.js")
+@app.route("/get-files", methods=["POST"])
+def get_files():
+  path = request.json.get('path')
+  files = []
+  for file_name in os.listdir(path):
+      if ".tif" in file_name:
+          file_path = os.path.join(path, file_name)
+          file = {
+            "name" : file_name,
+            "path" : file_path,
+            "size" : os.path.getsize(file_path)
+          }
+          files.append(file)
+  return jsonify(files)
 
 
 """
