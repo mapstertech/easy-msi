@@ -209,6 +209,8 @@ app.whenReady().then(async () => {
    */
   browserWindows.mainWindow = new BrowserWindow({
     frame: false,
+    width: 1200,
+    height: 700,
     webPreferences: {
       contextIsolation: false,
       enableRemoteModule: true,

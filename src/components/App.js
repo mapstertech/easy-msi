@@ -1,5 +1,4 @@
 import React, { Fragment, useEffect } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
 
 import Titlebar from 'components/Titlebar/Titlebar';
 import Projects from 'components/Interface/Projects';
@@ -28,26 +27,19 @@ function App() {
         dispatch(setCurrentProjectIndex(parseInt(projectIndex)));
       }
     }
-    // setTimeout(() => get(
-    //   'example', // Route
-    //   (response) => alert(response), // Response callback
-    //   (error) => console.error(error) // Error callback
-    // ), 3000);
   }, []);
 
   return (
     <Fragment>
       <Titlebar />
-      <Container fluid className="app">
-        <Row>
-          <Col className="projects" xs={3}>
-            <Projects />
-          </Col>
-          <Col className="workspace" xs={9}>
-            <Workspace />
-          </Col>
-        </Row>
-      </Container>
+      <x-box class="app">
+        <div className="projects">
+          <Projects />
+        </div>
+        <div className="workspace">
+          <Workspace />
+        </div>
+      </x-box>
     </Fragment>
   );
 }

@@ -10,10 +10,10 @@
     "get-port": "^5.1.1",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
-    "react-bootstrap": "^2.10.4",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
-    "react-scripts": "3.4.1"
+    "react-scripts": "3.4.1",
+    "xel": "^0.28.12"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^4.2.4",

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Button, ButtonGroup } from 'react-bootstrap';
 
 import { useProjectContext, addProject, setCurrentProjectIndex } from '../../contexts/ProjectContext';
 
@@ -8,7 +7,8 @@ const Projects = () => {
   let projectTemplate = {
     name : "New Project",
     path : "",
-    stage : 0
+    resized : false,
+    stage : 1
   }
 
   const { projects : { allProjects, currentProjectIndex }, dispatch } = useProjectContext()
@@ -27,16 +27,20 @@ const Projects = () => {
 
   return (
     <div>
-      <div className="d-grid gap-2">
-        <ButtonGroup vertical>
-          {allProjects.map((project, index) => {
-            return (
-              <Button key={`project-${index}`} variant="dark" active={currentProjectIndex === index ? true : false} onClick={() => dispatch(setCurrentProjectIndex(index))}>{project.name}</Button>
-            )
-          })}
-        </ButtonGroup>
-      </div>
-      <Button className="add-project" variant="success" size="sm" onClick={() => getDirectory()}>Add a new project</Button>
+      <section>
+        <h3><x-message>Projects</x-message></h3>
+        {allProjects.map((project, index) => {
+          return (
+            <x-button skin="nav" key={`project-${index}`} toggled={currentProjectIndex === index ? true : null} onClick={() => dispatch(setCurrentProjectIndex(index))}>
+              <x-label>{project.name}</x-label>
+            </x-button>
+          )
+        })}
+      </section>
+      <hr />
+      <section>
+        <x-button className="add-project" onClick={() => getDirectory()}><x-label>Add a new project</x-label></x-button>
+      </section>
     </div>
   )
 }

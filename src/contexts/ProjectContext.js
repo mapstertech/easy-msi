@@ -69,7 +69,7 @@ export function projectReducer(state, action) {
       localStorage.setItem('projectIndex', action.projectIndex)
       return {
         ...state,
-        currentProjectIndex : action.projectIndex
+        currentProjectIndex : action.projectIndex,
       };
     default:
       return state;

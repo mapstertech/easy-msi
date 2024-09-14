@@ -7,13 +7,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { ProjectProvider } from './contexts/ProjectContext';
-
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { FilesProvider } from './contexts/FilesContext';
 
 ReactDOM.render(
   <React.StrictMode>
     <ProjectProvider>
-      <App />
+      <FilesProvider>
+        <App />
+      </FilesProvider>
     </ProjectProvider>
   </React.StrictMode>,
   document.getElementById('root')

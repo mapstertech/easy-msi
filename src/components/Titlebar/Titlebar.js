@@ -23,7 +23,7 @@ const Titlebar = () => {
     <section className="titlebar">
       <div>
         <img src={ favicon } alt="favicon" />
-        <span id="electron-window-title-text">{ document.title }</span>
+        <span>{ document.title }</span>
       </div>
 
       <div id="electron-window-title-buttons">

@@ -1,7 +1,13 @@
 #root {
   .workspace {
-    padding-top: 5px;
+    width: 75%;
+    padding: 0px 20px;
     overflow-y: auto;
+    .no-project-selected {
+      align-items:center;
+      justify-content:center;
+      margin-top: 25%;
+    }
     .header-separator {
       margin-top: 5px;
     }
