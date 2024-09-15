@@ -1,5 +1,8 @@
+const { contextBridge, ipcRenderer } = require('electron');
+const fs = require('fs');
 const { dialog } = require('electron').remote;
 window.dialog = dialog;
+window.fs = fs;
 
 // All of the Node.js APIs are available in the preload process.
 // It has the same sandbox as a Chrome extension.

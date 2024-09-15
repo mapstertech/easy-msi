@@ -1,6 +1,6 @@
 #root {
   .workspace {
-    width: 75%;
+    width: 85%;
     padding: 0px 20px;
     overflow-y: auto;
     .no-project-selected {
@@ -17,6 +17,35 @@
     }
     .button-tabs button {
       border-radius: 0px;
+    }
+    .canvas-container {
+      width: 100%;
+      .floating-controls {
+        width: 150px;
+        position: absolute;
+        margin-right: 20px;
+        right: 0;
+        z-index: 999;
+        x-card {
+          margin: 0;
+          padding: 10px;
+          hr {
+            margin-bottom: 10px;
+          }
+          .control {
+            margin-bottom: 10px;
+            x-label {
+              margin-bottom: 3px;
+            }
+            x-switch {
+              margin-top: 4px;
+              x-label {
+                padding-left: 5px;
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

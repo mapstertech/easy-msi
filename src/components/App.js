@@ -32,8 +32,8 @@ function App() {
   return (
     <Fragment>
       <Titlebar />
-      <x-box class="app">
-        <div className="projects">
+      <x-box id="app" class="app">
+        <div id="projects" className="projects">
           <Projects />
         </div>
         <div className="workspace">

@@ -20,7 +20,7 @@ const Titlebar = () => {
   };
 
   return (
-    <section className="titlebar">
+    <section id="titlebar" className="titlebar">
       <div>
         <img src={ favicon } alt="favicon" />
         <span>{ document.title }</span>

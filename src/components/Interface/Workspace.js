@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import Resize from '../Stages/Resize'
 import Process from '../Stages/Process'
+import Analyze from '../Stages/Analyze'
 
 import { post } from '../../utils/requests';
 import trash from '../../img/trash-icon.png';
@@ -48,30 +49,32 @@ const Workspace = () => {
     <div>
       {currentProject ?
         <div>
-          <x-box>
-            <section style={{width: '50%'}}>
-              <h2>{currentProject.name}</h2>
-            </section>
-            <div style={{width: '50%'}}>
-              <x-button style={{float: 'right'}} onClick={() => deleteProject()}><x-icon href="#delete"></x-icon></x-button>
-              {editing ?
-                <x-box style={{float: 'right', marginRight: '5px'}}>
-                  <x-input style={{marginRight: '5px'}} type="text" onInput={(e) => changeProjectProperty('name', e.target.value)}>
-                    <x-label>{currentProject.name}</x-label>
-                  </x-input>
-                  <x-button style={{float: 'right', marginRight: '5px'}} onClick={() => setEditing(false)}><x-icon href="#check"></x-icon></x-button>
-                </x-box>
-              :
-                <x-button style={{float: 'right', marginRight: '5px'}} onClick={() => setEditing(true)}><x-icon href="#edit"></x-icon></x-button>
-              }
+          <div id="workspace-header">
+            <x-box>
+              <section style={{width: '50%'}}>
+                <h2>{currentProject.name}</h2>
+              </section>
+              <div style={{width: '50%'}}>
+                <x-button style={{float: 'right'}} onClick={() => deleteProject()}><x-icon href="#delete"></x-icon></x-button>
+                {editing ?
+                  <x-box style={{float: 'right', marginRight: '5px'}}>
+                    <x-input style={{marginRight: '5px'}} type="text" onInput={(e) => changeProjectProperty('name', e.target.value)}>
+                      <x-label>{currentProject.name}</x-label>
+                    </x-input>
+                    <x-button style={{float: 'right', marginRight: '5px'}} onClick={() => setEditing(false)}><x-icon href="#check"></x-icon></x-button>
+                  </x-box>
+                :
+                  <x-button style={{float: 'right', marginRight: '5px'}} onClick={() => setEditing(true)}><x-icon href="#edit"></x-icon></x-button>
+                }
+              </div>
+            </x-box>
+            <div>
+              <x-tabs>
+                <x-tab selected={currentProject.stage === 1 ? true : null} onClick={() => changeProjectProperty('stage', 1)}><x-label>1. Resize</x-label></x-tab>
+                <x-tab selected={currentProject.stage === 2 ? true : null} onClick={() => changeProjectProperty('stage', 2)}><x-label>2. Process</x-label></x-tab>
+                <x-tab selected={currentProject.stage === 3 ? true : null} onClick={() => changeProjectProperty('stage', 3)}><x-label>3. Analyze</x-label></x-tab>
+              </x-tabs>
             </div>
-          </x-box>
-          <div>
-            <x-tabs>
-              <x-tab selected={currentProject.stage === 1 ? true : null} onClick={() => changeProjectProperty('stage', 1)}><x-label>1. Resize</x-label></x-tab>
-              <x-tab selected={currentProject.stage === 2 ? true : null} onClick={() => changeProjectProperty('stage', 2)}><x-label>2. Process</x-label></x-tab>
-              <x-tab selected={currentProject.stage === 3 ? true : null} onClick={() => changeProjectProperty('stage', 3)}><x-label>3. Analyze</x-label></x-tab>
-            </x-tabs>
           </div>
           <div style={{marginTop: '20px'}}>
             {currentProject.stage === 1 ?
@@ -79,6 +82,9 @@ const Workspace = () => {
             : false }
             {currentProject.stage === 2 ?
               <Process currentProject={currentProject} changeProjectProperty={changeProjectProperty} />
+            : false }
+            {currentProject.stage === 3 ?
+              <Analyze currentProject={currentProject} changeProjectProperty={changeProjectProperty} />
             : false }
           </div>
         </div>
