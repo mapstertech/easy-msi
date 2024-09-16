@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Resize from '../Stages/Resize'
 import Process from '../Stages/Process'
 import Analyze from '../Stages/Analyze'
+import Target from '../Stages/Target'
 
 import { post } from '../../utils/requests';
 import trash from '../../img/trash-icon.png';
@@ -73,6 +74,7 @@ const Workspace = () => {
                 <x-tab selected={currentProject.stage === 1 ? true : null} onClick={() => changeProjectProperty('stage', 1)}><x-label>1. Resize</x-label></x-tab>
                 <x-tab selected={currentProject.stage === 2 ? true : null} onClick={() => changeProjectProperty('stage', 2)}><x-label>2. Process</x-label></x-tab>
                 <x-tab selected={currentProject.stage === 3 ? true : null} onClick={() => changeProjectProperty('stage', 3)}><x-label>3. Analyze</x-label></x-tab>
+                <x-tab selected={currentProject.stage === 4 ? true : null} onClick={() => changeProjectProperty('stage', 4)}><x-label>4. Target</x-label></x-tab>
               </x-tabs>
             </div>
           </div>
@@ -85,6 +87,9 @@ const Workspace = () => {
             : false }
             {currentProject.stage === 3 ?
               <Analyze currentProject={currentProject} changeProjectProperty={changeProjectProperty} />
+            : false }
+            {currentProject.stage === 4 ?
+              <Target currentProject={currentProject} changeProjectProperty={changeProjectProperty} />
             : false }
           </div>
         </div>

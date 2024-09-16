@@ -6,12 +6,14 @@ import { Stage, Layer, Image } from 'react-konva';
 import { post } from '../../utils/requests';
 import { useProjectContext } from '../../contexts/ProjectContext';
 import { useFilesContext, setFiles, setResizedFiles, setProcessedFiles, setResizedProcessedFiles } from '../../contexts/FilesContext';
+import { useImageContext, setImageURI, setImageDimensions } from '../../contexts/ImageContext';
 
 const Analyze = ({ currentProject, changeProjectProperty }) => {
   const { projects : {}, dispatch : projectDispatch } = useProjectContext()
   const { files : { processedFiles, resizedProcessedFiles }, dispatch : filesDispatch } = useFilesContext()
+  const { image : { imageURI, imageDimensions }, dispatch : imageDispatch } = useImageContext()
 
-  const defaultImageSettings = {
+  const defaultImageFilters = {
     contrast : 0,
     brightness : 0,
     hue : 0,
@@ -20,6 +22,14 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
     red : 150,
     green : 150,
     blue : 150
+  }
+
+  const defaultFiltersMinMax = {
+    contrast : [0, 100],
+    brightness : [0, 1],
+    hue : [0, 259],
+    saturation : [-2, 10],
+    luminance : [-2, 2]
   }
 
   const defaultImageBands = [0, 2, 4];
@@ -31,18 +41,17 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
   const [ availableHeight, setAvailableHeight ] = useState(0);
   const [ availableWidth, setAvailableWidth ] = useState(0)
   const [ currentFile, setCurrentFile ] = useState(false);
+  const [ currentImage, setCurrentImage ] = useState(false);
   const [ currentImageCanvas, setCurrentImageCanvas ] = useState(false);
   const [ totalImageBands, setTotalImageBands ] = useState(0);
   const [ currentImageBands, setCurrentImageBands ] = useState()
   const [ selectedImageBands, setSelectedImageBands ] = useState(defaultImageBands)
 
-  const [ imageWidth, setImageWidth ] = useState(0)
-  const [ imageHeight, setImageHeight ] = useState(0)
   const [ stageScale, setStageScale ] = useState(1);
   const [ stageX, setStageX ] = useState(0);
   const [ stageY, setStageY ] = useState(0);
 
-  const [ imageSettings, setImageSettings ] = useState(defaultImageSettings);
+  const [ imageFilters, setImageFilters ] = useState(defaultImageFilters);
 
   useEffect(() => {
     findAvailableSpace()
@@ -60,43 +69,59 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
 
   useEffect(() => {
     if(currentFile) {
-      createTiffImage()
+      createTiffImage();
     }
   }, [currentFile])
 
   useEffect(() => {
-    if(imageSettings && imageRef.current) {
+    if(currentImage) {
+      createCanvasImage()
+    }
+  }, [currentImage])
+
+  useEffect(() => {
+    if(imageFilters && imageRef.current) {
       adjustImage()
     }
-  }, [imageSettings])
+  }, [imageFilters])
 
   const adjustImage = () => {
-    imageRef.current.contrast(imageSettings.contrast);
-    imageRef.current.brightness(imageSettings.brightness);
-    imageRef.current.hue(imageSettings.hue);
-    imageRef.current.saturation(imageSettings.saturation);
-    imageRef.current.luminance(imageSettings.luminance);
+    imageRef.current.contrast(imageFilters.contrast);
+    imageRef.current.brightness(imageFilters.brightness);
+    imageRef.current.hue(imageFilters.hue);
+    imageRef.current.saturation(imageFilters.saturation);
+    imageRef.current.luminance(imageFilters.luminance);
     imageRef.current.cache();
+  }
+
+  const saveImage = async () => {
+    await canvasRef.current.toImage({ callback : (resp) => {
+      let uri = resp.src;
+      imageDispatch(setImageURI(uri));
+    }, mimeType : "image/png" });
   }
 
   const createTiffImage = async() => {
     const fileBuffer = window.fs.readFileSync(currentFile.path);
     const tiff = await fromArrayBuffer(bufferToArrayBuffer(fileBuffer));
     const image = await tiff.getImage();
+    setCurrentImage(image);
+  }
+
+  const createCanvasImage = async() => {
     const [r, g, b] = await Promise.all([
-      image.readRasters({ samples: [selectedImageBands[0]] }), // Band 1
-      image.readRasters({ samples: [selectedImageBands[1]] }), // Band 2
-      image.readRasters({ samples: [selectedImageBands[2]] })  // Band 3
+      currentImage.readRasters({ samples: [selectedImageBands[0]] }), // Band 1
+      currentImage.readRasters({ samples: [selectedImageBands[1]] }), // Band 2
+      currentImage.readRasters({ samples: [selectedImageBands[2]] })  // Band 3
     ]);
-    const width = image.getWidth();
-    const height = image.getHeight();
+    const width = currentImage.getWidth();
+    const height = currentImage.getHeight();
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext("2d");
     canvas.width = width;
     canvas.height = height;
-    setImageWidth(width);
-    setImageHeight(height);
+    imageDispatch(setImageDimensions([width, height]));
 
     const imageData = ctx.createImageData(width, height);
     const data = imageData.data; // This will hold RGBA values
@@ -114,8 +139,9 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
     ctx.putImageData(imageData, 0, 0);
     setCurrentImageCanvas(canvas);
     setCurrentImageBands(selectedImageBands);
-    setTotalImageBands(image.fileDirectory.SamplesPerPixel);
+    setTotalImageBands(currentImage.fileDirectory.SamplesPerPixel);
     adjustImage()
+    saveImage()
   }
 
   const findAvailableSpace = () => {
@@ -148,16 +174,16 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   }
 
-  const adjustImageSetting = (prop, val) => {
-    let newImageSettings = JSON.parse(JSON.stringify(imageSettings));
+  const adjustImageFilter = (prop, val) => {
+    let newImageFilters = JSON.parse(JSON.stringify(imageFilters));
     if(prop === 'default') {
-      for(let property in defaultImageSettings) {
-        newImageSettings[property] = defaultImageSettings[property];
+      for(let property in defaultImageFilters) {
+        newImageFilters[property] = defaultImageFilters[property];
       }
     } else {
-      newImageSettings[prop] = parseFloat(val);
+      newImageFilters[prop] = parseFloat(val);
     }
-    setImageSettings(newImageSettings)
+    setImageFilters(newImageFilters)
   }
 
   const selectBand = (index, band) => {
@@ -171,29 +197,46 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
     }
   }
 
-  const saveImage = async () => {
-    if(canvasRef.current) {
-      await canvasRef.current.toImage({ callback : (resp) => {
-        let uri = resp.src;
-        var link = document.getElementById('download-link');
-        link.setAttribute('download', `${currentProject.name}-${selectedImageBands.join('_')}.png`);
-        link.setAttribute('href', uri);
-        link.click();
-      }, mimeType : "image/png", width : imageWidth, height : imageHeight });
+  const downloadImage = async () => {
+    // if(canvasRef.current) {
+    //   await canvasRef.current.toImage({ callback : (resp) => {
+    //     let uri = resp.src;
+    //     var link = document.getElementById('download-link');
+    //     link.setAttribute('download', `${currentProject.name}-${selectedImageBands.join('_')}.png`);
+    //     link.setAttribute('href', uri);
+    //     link.click();
+    //   }, mimeType : "image/png", width : imageWidth, height : imageHeight });
+    // }
+  }
+
+  const randomizeLayers = () => {
+    let randomImageBands = [
+      Math.floor( Math.random() * totalImageBands ),
+      Math.floor( Math.random() * totalImageBands ),
+      Math.floor( Math.random() * totalImageBands )
+    ]
+    setSelectedImageBands(randomImageBands)
+  }
+
+  const randomizeFilters = () => {
+    let newRandomFilters = {};
+    for(let prop in defaultFiltersMinMax) {
+      newRandomFilters[prop] = Math.round((Math.random() * (defaultFiltersMinMax[prop][1] - defaultFiltersMinMax[prop][0]) + defaultFiltersMinMax[prop][0]) * 100)/100
     }
+    setImageFilters(newRandomFilters)
   }
 
   let width = 0;
   let height = 0
   if(currentImageCanvas) {
     // If there is less space available for the height, then it's the smaller side
-    let imageRatio = imageWidth / imageHeight;
+    let imageRatio = imageDimensions[0] / imageDimensions[1];
     if((availableWidth/availableHeight) > imageRatio) {
       height = availableHeight;
-      width = availableHeight * (imageWidth / imageHeight)
+      width = availableHeight * (imageDimensions[0] / imageDimensions[1])
     } else {
       width = availableWidth;
-      height = availableWidth * (imageHeight / imageWidth)
+      height = availableWidth * (imageDimensions[1] / imageDimensions[0])
     }
   }
 
@@ -204,6 +247,7 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
           {totalImageBands > 0 ?
             <x-card>
               <div className="control">
+                <div className="randomizer" onClick={() => randomizeLayers()}><x-icon size="small" href="#shuffle"></x-icon></div>
                 <x-label>Red Layer</x-label>
                 <x-select size="small" value={selectedImageBands[0]} onClick={(e) => selectBand(0, e.target.value)}>
                   <x-menu>
@@ -247,35 +291,36 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
               </div>
               {selectedImageBands.join() !== currentImageBands.join() ?
                 <div className="control">
-                  <x-button condensed="true" size="small" onClick={() => createTiffImage()}><x-label>Regenerate Image</x-label></x-button>
+                  <x-button condensed="true" size="small" onClick={() => createCanvasImage()}><x-label>Regenerate Image</x-label></x-button>
                 </div>
               : false}
               <hr />
               <div className="control">
-                <x-label>Contrast ({imageSettings.contrast})</x-label>
-                <input type="range" value={imageSettings.contrast} min="0" max="100" onChange={(e) => adjustImageSetting('contrast', e.target.value)} />
+                <div className="randomizer" onClick={() => randomizeFilters()}><x-icon size="small" href="#shuffle"></x-icon></div>
+                <x-label>Contrast ({imageFilters.contrast})</x-label>
+                <input type="range" value={imageFilters.contrast} min={defaultFiltersMinMax.contrast[0]} max={defaultFiltersMinMax.contrast[1]} onMouseUp={() => saveImage()} onChange={(e) => adjustImageFilter('contrast', e.target.value)} />
               </div>
               <div className="control">
-                <x-label>Brightness ({imageSettings.brightness})</x-label>
-                <input type="range" value={imageSettings.brightness} min="0" max="1" step="0.01" onChange={(e) => adjustImageSetting('brightness', e.target.value)} />
+                <x-label>Brightness ({imageFilters.brightness})</x-label>
+                <input type="range" value={imageFilters.brightness} min={defaultFiltersMinMax.brightness[0]} max={defaultFiltersMinMax.brightness[1]} onMouseUp={() => saveImage()} step="0.01" onChange={(e) => adjustImageFilter('brightness', e.target.value)} />
               </div>
               <div className="control">
-                <x-label>Hue ({imageSettings.hue})</x-label>
-                <input type="range" value={imageSettings.hue} min="0" max="259" step="1" onChange={(e) => adjustImageSetting('hue', e.target.value)} />
+                <x-label>Hue ({imageFilters.hue})</x-label>
+                <input type="range" value={imageFilters.hue} min={defaultFiltersMinMax.hue[0]} max={defaultFiltersMinMax.hue[1]} step="1" onMouseUp={() => saveImage()} onChange={(e) => adjustImageFilter('hue', e.target.value)} />
               </div>
               <div className="control">
-                <x-label>Saturation ({imageSettings.saturation})</x-label>
-                <input type="range" value={imageSettings.saturation} min="-2" max="10" step="0.5" onChange={(e) => adjustImageSetting('saturation', e.target.value)} />
+                <x-label>Saturation ({imageFilters.saturation})</x-label>
+                <input type="range" value={imageFilters.saturation} min={defaultFiltersMinMax.saturation[0]} max={defaultFiltersMinMax.saturation[1]} step="0.5" onMouseUp={() => saveImage()} onChange={(e) => adjustImageFilter('saturation', e.target.value)} />
               </div>
               <div className="control">
-                <x-label>Luminance ({imageSettings.luminance})</x-label>
-                <input type="range" value={imageSettings.luminance} min="-2" max="2" step="0.1" onChange={(e) => adjustImageSetting('luminance', e.target.value)} />
+                <x-label>Luminance ({imageFilters.luminance})</x-label>
+                <input type="range" value={imageFilters.luminance} min={defaultFiltersMinMax.luminance[0]} max={defaultFiltersMinMax.luminance[1]} step="0.1" onMouseUp={() => saveImage()} onChange={(e) => adjustImageFilter('luminance', e.target.value)} />
               </div>
               <div className="control">
-                <x-button onClick={() => adjustImageSetting('default')}><x-label>Reset</x-label></x-button>
+                <x-button onClick={() => adjustImageFilter('default')}><x-label>Reset</x-label></x-button>
               </div>
               <hr />
-              <x-button onClick={() => saveImage()}><x-label>Save Image</x-label></x-button>
+              <x-button onClick={() => downloadImage()}><x-label>Save Image</x-label></x-button>
               <a id="download-link"></a>
             </x-card>
           : false }
@@ -308,15 +353,15 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
 }
 // <div className="control">
 //   <x-label>Red (Layer one)</x-label>
-//   <input type="range" value={imageSettings.red} min="0" max="256" step="1" onChange={(e) => adjustImageSetting('red', e.target.value)} />
+//   <input type="range" value={imageFilters.red} min="0" max="256" step="1" onChange={(e) => adjustImageFilter('red', e.target.value)} />
 // </div>
 // <div className="control">
 //   <x-label>Green (Layer two)</x-label>
-//   <input type="range" value={imageSettings.green} min="0" max="256" step="0.5" onChange={(e) => adjustImageSetting('green', e.target.value)} />
+//   <input type="range" value={imageFilters.green} min="0" max="256" step="0.5" onChange={(e) => adjustImageFilter('green', e.target.value)} />
 // </div>
 // <div className="control">
 //   <x-label>Blue (Layer three)</x-label>
-//   <input type="range" value={imageSettings.blue} min="0" max="256" step="0.1" onChange={(e) => adjustImageSetting('blue', e.target.value)} />
+//   <input type="range" value={imageFilters.blue} min="0" max="256" step="0.1" onChange={(e) => adjustImageFilter('blue', e.target.value)} />
 // </div>
 
 export default Analyze;

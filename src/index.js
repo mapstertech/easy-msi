@@ -8,12 +8,15 @@ import ReactDOM from 'react-dom';
 
 import { ProjectProvider } from './contexts/ProjectContext';
 import { FilesProvider } from './contexts/FilesContext';
+import { ImageProvider } from './contexts/ImageContext';
 
 ReactDOM.render(
   <React.StrictMode>
     <ProjectProvider>
       <FilesProvider>
-        <App />
+        <ImageProvider>
+          <App />
+        </ImageProvider>
       </FilesProvider>
     </ProjectProvider>
   </React.StrictMode>,

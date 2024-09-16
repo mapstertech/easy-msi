@@ -29,6 +29,17 @@
         x-card {
           margin: 0;
           padding: 10px;
+          .randomizer {
+            float: right;
+            padding: 5px;
+            border-radius: 4px;
+            margin-top: -5px;
+            margin-right: -5px;
+            &:hover {
+              cursor: pointer;
+              background: #eee;
+            }
+          }
           hr {
             margin-bottom: 10px;
           }
@@ -46,6 +57,9 @@
           }
         }
       }
+    }
+    .image-drawing {
+      margin-top: 10px;
     }
   }
 }
