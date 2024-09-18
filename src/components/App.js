@@ -5,6 +5,7 @@ import Projects from 'components/Interface/Projects';
 import Workspace from 'components/Interface/Workspace';
 
 import { useProjectContext, setProjects, setCurrentProjectIndex } from '../contexts/ProjectContext';
+import { useFilesContext, setSelectedFile } from '../contexts/FilesContext';
 import { useImageContext, setImageURI, setImageDimensions } from '../contexts/ImageContext';
 
 import 'scss/App.scss';
@@ -16,6 +17,7 @@ import 'scss/Workspace.scss';
 function App() {
 
   const { dispatch : projectDispatch } = useProjectContext()
+  const { dispatch : filesDispatch } = useFilesContext()
   const { dispatch : imageDispatch } = useImageContext()
 
   useEffect(() => {
@@ -27,6 +29,12 @@ function App() {
       let projectIndex = localStorage.getItem('projectIndex')
       if(projectIndex && projectIndex !== "false") {
         projectDispatch(setCurrentProjectIndex(parseInt(projectIndex)));
+      }
+    }
+    if(localStorage.getItem('selectedFile')) {
+      let selectedFile = localStorage.getItem('selectedFile')
+      if(selectedFile && selectedFile !== "false") {
+        filesDispatch(setSelectedFile(selectedFile));
       }
     }
     if(localStorage.getItem('imageURI')) {

@@ -2,18 +2,28 @@ import React, { useState, useEffect } from 'react';
 import Konva from 'konva';
 import { Stage, Layer, Image, Rect } from 'react-konva';
 
+import { findAvailableSpace } from '../../utils/utils'
 import { post } from '../../utils/requests';
-import { useProjectContext } from '../../contexts/ProjectContext';
-import { useFilesContext, setFiles, setResizedFiles, setProcessedFiles, setResizedProcessedFiles } from '../../contexts/FilesContext';
+import { useCanvasContext, setCanvasDimensions } from '../../contexts/CanvasContext';
 import { useImageContext } from '../../contexts/ImageContext';
 
 const Target = ({ currentProject, changeProjectProperty }) => {
 
-  const { image : { imageURI, imageDimensions }, dispatch : canvasDispatch } = useImageContext()
+  const { canvas : { canvasDimensions }, dispatch : canvasDispatch } = useCanvasContext()
+  const { image : { imageURI, imageDimensions }, dispatch : imageDispatch } = useImageContext()
 
   const [ imageElement, setImageElement ] = useState(false);
   const [ annotationBeingDrawn, setAnnotationBeingDrawn ] = useState(false);
   const [ annotation, setAnnotation ] = useState(false);
+
+  useEffect(() => {
+    let dimensions = findAvailableSpace(imageDimensions)
+    canvasDispatch(setCanvasDimensions(dimensions))
+    window.addEventListener('resize', () => {
+      let dimensions = findAvailableSpace(imageDimensions)
+      canvasDispatch(setCanvasDimensions(dimensions))
+    });
+  }, [])
 
   useEffect(() => {
     if(imageURI) {
@@ -62,7 +72,7 @@ const Target = ({ currentProject, changeProjectProperty }) => {
 
   return (
     <div>
-      <x-accordion>
+      <x-accordion expanded="true">
         <header>
           <x-label>1. Select Area of Interest</x-label>
         </header>
@@ -75,8 +85,8 @@ const Target = ({ currentProject, changeProjectProperty }) => {
                 onMouseDown={handleMouseDown}
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
-                width={imageDimensions[0]}
-                height={imageDimensions[1]}>
+                width={canvasDimensions[0]}
+                height={canvasDimensions[1]}>
                 <Layer>
                   <Image
                     image={imageElement}
