@@ -7,6 +7,7 @@ const initialState = {
   processedFiles : [],
   resizedFiles : [],
   resizedProcessedFiles : [],
+  targetedFiles : [],
   selectedFile : false,
   loadedFile : false
 }
@@ -16,6 +17,7 @@ export const SET_FILES = 'SET_FILES'
 export const SET_PROCESSED_FILES = 'SET_PROCESSED_FILES'
 export const SET_RESIZED_FILES = 'SET_RESIZED_FILES'
 export const SET_RESIZED_PROCESSED_FILES = 'SET_RESIZED_PROCESSED_FILES'
+export const SET_TARGETED_FILES = 'SET_TARGETED_FILES'
 export const SET_SELECTED_FILE = 'SET_SELECTED_FILE'
 export const SET_LOADED_FILE = 'SET_LOADED_FILE'
 
@@ -31,6 +33,9 @@ export function setResizedFiles(resizedFiles) {
 }
 export function setResizedProcessedFiles(resizedProcessedFiles) {
   return { type : SET_RESIZED_PROCESSED_FILES, resizedProcessedFiles }
+}
+export function setTargetedFiles(targetedFiles) {
+  return { type : SET_TARGETED_FILES, targetedFiles }
 }
 export function setSelectedFile(selectedFile) {
   return { type : SET_SELECTED_FILE, selectedFile }
@@ -62,6 +67,11 @@ export function filesReducer(state, action) {
       return {
         ...state,
         resizedProcessedFiles : action.resizedProcessedFiles,
+      };
+    case SET_TARGETED_FILES:
+      return {
+        ...state,
+        targetedFiles : action.targetedFiles,
       };
     case SET_SELECTED_FILE:
       localStorage.setItem('selectedFile', action.selectedFile)

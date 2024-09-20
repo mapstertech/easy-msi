@@ -21,6 +21,7 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
 
+  const [ loading, setLoading ] = useState(canvas ? false : true);
   const [ currentImageBands, setCurrentImageBands ] = useState([])
 
   useEffect(() => {
@@ -107,6 +108,7 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
 
     // Draw the ImageData onto the canvas
     ctx.putImageData(imageData, 0, 0);
+    setLoading(false)
     canvasDispatch(setCanvas(canvas));
     canvasDispatch(setTotalBands(image.fileDirectory.SamplesPerPixel))
     setCurrentImageBands(selectedBands);
@@ -318,6 +320,9 @@ const Analyze = ({ currentProject, changeProjectProperty }) => {
               />
             </Layer>
           </Stage>
+        : false}
+        {loading ?
+          <h3><x-label>Loading...</x-label></h3>
         : false}
       </div>
     </div>

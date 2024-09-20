@@ -6,8 +6,9 @@ import { useFilesContext, setFiles, setSelectedFile, setResizedFiles, setProcess
 
 const Process = ({ currentProject, changeProjectProperty }) => {
   const { projects : {}, dispatch : projectDispatch } = useProjectContext()
-  const { files : { files, processedFiles, resizedFiles, resizedProcessedFiles, selectedFile }, dispatch : filesDispatch } = useFilesContext()
+  const { files : { files, processedFiles, resizedFiles, resizedProcessedFiles, targetedFiles, selectedFile }, dispatch : filesDispatch } = useFilesContext()
   const [ selectedFolder, setSelectedFolder ] = useState('resized');
+  const [ loading, setLoading ] = useState(false);
 
   const process = () => {
     let folder = 'resized';
@@ -16,12 +17,14 @@ const Process = ({ currentProject, changeProjectProperty }) => {
         folder = "";
       }
     }
+    setLoading(true)
     post(JSON.stringify({ path : currentProject.path, folder : folder }), 'process-folder', (resp) => {
       if(resp.folder === 'resized') {
         filesDispatch(setResizedProcessedFiles(resp.processed_files));
       } else {
         filesDispatch(setProcessedFiles(resp.processed_files));
       }
+      setLoading(false)
     })
   }
 
@@ -40,14 +43,17 @@ const Process = ({ currentProject, changeProjectProperty }) => {
         </x-radios>
       </div>
       <x-button onClick={() => process()}><x-label>Create Composite Images</x-label></x-button>
-      {resizedProcessedFiles.length > 0 ?
-        <div>
-          <hr style={{marginTop: '10px'}}/>
-          <h3>Processed Resized Files</h3>
-          <x-label>Select a file to analyze for the next step.</x-label>
-          <x-accordion expanded="true">
+      <div className="loading-bar">
+        {loading ? <x-progressbar /> : false }
+      </div>
+      <div className="file-list">
+        <hr style={{marginTop: '10px'}}/>
+        <h3>Select File to View</h3>
+        <x-label>Select a file to analyze for the next step.</x-label>
+        {resizedProcessedFiles.length > 0 ?
+          <x-accordion>
             <header>
-              <x-label>{currentProject.path}\resized\processed ({resizedProcessedFiles.length} files, {parseFloat(resizedProcessedFiles.reduce((a, b) => a + b.size, 0)/1000000).toFixed(2)} MB)</x-label>
+              <x-label>Resized Files ({resizedProcessedFiles.length} files, {parseFloat(resizedProcessedFiles.reduce((a, b) => a + b.size, 0)/1000000).toFixed(2)} MB)</x-label>
             </header>
             <main>
               <x-radios>
@@ -55,27 +61,41 @@ const Process = ({ currentProject, changeProjectProperty }) => {
                   return <x-radio key={`resized-${i}`} toggled={selectedFile === file.path ? true : null} onClick={() => filesDispatch(setSelectedFile(file.path))}><x-label>{file.name} ({parseFloat(file.size / 1000000).toFixed(2)} MB)</x-label></x-radio>
                 })}
               </x-radios>
+              <x-tag size="small"><x-label>{currentProject.path}\resized\processed</x-label></x-tag>
             </main>
           </x-accordion>
-        </div>
-      : false}
-      {processedFiles.length > 0 ?
-        <div>
-          <h3>Processed Raw Files</h3>
+        : false }
+        {processedFiles.length > 0 ?
           <x-accordion>
             <header>
-              <x-label>{currentProject.path}\processed ({processedFiles.length} files, {parseFloat(processedFiles.reduce((a, b) => a + b.size, 0)/1000000).toFixed(2)} MB)</x-label>
+              <x-label>Raw Files ({processedFiles.length} files, {parseFloat(processedFiles.reduce((a, b) => a + b.size, 0)/1000000).toFixed(2)} MB)</x-label>
             </header>
             <main>
-              <ul>
-                {processedFiles.map(file => {
-                  return <li><small>{file.name} ({parseFloat(file.size / 1000000).toFixed(2)} MB)</small></li>
+              <x-radios>
+                {processedFiles.map((file, i) => {
+                  return <x-radio key={`raw-${i}`} toggled={selectedFile === file.path ? true : null} onClick={() => filesDispatch(setSelectedFile(file.path))}><x-label>{file.name} ({parseFloat(file.size / 1000000).toFixed(2)} MB)</x-label></x-radio>
                 })}
-              </ul>
+              </x-radios>
+              <x-tag size="small"><x-label>{currentProject.path}\processed</x-label></x-tag>
             </main>
           </x-accordion>
-        </div>
-      : false}
+        : false}
+        {targetedFiles.length > 0 ?
+          <x-accordion>
+            <header>
+              <x-label>Targeted Files ({targetedFiles.length} files, {parseFloat(targetedFiles.reduce((a, b) => a + b.size, 0)/1000000).toFixed(2)} MB)</x-label>
+            </header>
+            <main>
+              <x-radios>
+                {targetedFiles.map((file, i) => {
+                  return <x-radio key={`raw-${i}`} toggled={selectedFile === file.path ? true : null} onClick={() => filesDispatch(setSelectedFile(file.path))}><x-label>{file.name} ({parseFloat(file.size / 1000000).toFixed(2)} MB)</x-label></x-radio>
+                })}
+              </x-radios>
+              <x-tag size="small"><x-label>{currentProject.path}\targeted</x-label></x-tag>
+            </main>
+          </x-accordion>
+        : false}
+      </div>
       {selectedFile ?
         <x-button onClick={() => changeProjectProperty('stage', 3)}><x-label>Next Step</x-label></x-button>
       : false }

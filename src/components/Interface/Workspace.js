@@ -8,7 +8,7 @@ import Target from '../Stages/Target'
 import { post } from '../../utils/requests';
 import trash from '../../img/trash-icon.png';
 import { useProjectContext, editProject, removeProject } from '../../contexts/ProjectContext';
-import { useFilesContext, setFiles, setResizedFiles, setProcessedFiles, setResizedProcessedFiles } from '../../contexts/FilesContext';
+import { useFilesContext, setFiles, setResizedFiles, setProcessedFiles, setResizedProcessedFiles, setTargetedFiles } from '../../contexts/FilesContext';
 
 const Workspace = () => {
   const { projects : { allProjects, currentProjectIndex }, dispatch : projectDispatch } = useProjectContext()
@@ -30,6 +30,7 @@ const Workspace = () => {
         filesDispatch(setProcessedFiles(resp.processed_files));
         filesDispatch(setResizedFiles(resp.resized_files));
         filesDispatch(setResizedProcessedFiles(resp.resized_processed_files));
+        filesDispatch(setTargetedFiles(resp.targeted_files));
       })
     }
   }, [currentProject])
@@ -70,6 +71,7 @@ const Workspace = () => {
               </div>
             </x-box>
             <div>
+              <x-button onClick={() => window.location.reload()} style={{ zIndex: 999, position: 'absolute', right: 0, marginRight: 20 }} size="small"><x-icon size="small" href="#refresh" ></x-icon></x-button>
               <x-tabs>
                 <x-tab selected={currentProject.stage === 1 ? true : null} onClick={() => changeProjectProperty('stage', 1)}><x-label>1. Resize</x-label></x-tab>
                 <x-tab selected={currentProject.stage === 2 ? true : null} onClick={() => changeProjectProperty('stage', 2)}><x-label>2. Process</x-label></x-tab>

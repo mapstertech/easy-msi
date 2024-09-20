@@ -6,7 +6,7 @@ from PIL import Image
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from app_utils import process_images
+from app_utils import process_images, process_cropped_images
 
 app = Flask(__name__)
 app_config = {"host": "0.0.0.0", "port": sys.argv[1]}
@@ -81,11 +81,24 @@ def get_files():
                     "size" : os.path.getsize(file_path)
                 }
                 resized_processed_files.append(file)
+    targeted_path = os.path.join(path, 'targeted')
+    targeted_files = []
+    if os.path.exists(targeted_path):
+        for file_name in os.listdir(targeted_path):
+            if ".tif" in file_name:
+                file_path = os.path.join(targeted_path, file_name)
+                file = {
+                    "name" : file_name,
+                    "path" : file_path,
+                    "size" : os.path.getsize(file_path)
+                }
+                targeted_files.append(file)
     response = {
         "files" : files,
         "processed_files" : processed_files,
         "resized_files" : resized_files,
-        "resized_processed_files" : resized_processed_files
+        "resized_processed_files" : resized_processed_files,
+        "targeted_files" : targeted_files
     }
     return jsonify(response)
 
@@ -149,6 +162,29 @@ def process_folder():
     }
 
     return jsonify(response)
+
+
+@app.route("/targeted-folder-crop", methods=["POST"])
+def targeted_folder_crop():
+    path = request.json.get('path')
+    folder = request.json.get('folder')
+    name = request.json.get('name')
+    cropDimensions = request.json.get('cropDimensions')
+    targeted_path = os.path.join(path, 'targeted')
+    targeted_files = []
+
+    if not os.path.exists(targeted_path):
+        os.makedirs(targeted_path)
+
+    targeted_files = process_cropped_images(path, targeted_path, cropDimensions, name + '-')
+    response = {
+        "folder" : folder,
+        "targeted_files" : targeted_files
+    }
+
+    return jsonify(response)
+
+
 
 """
 -------------------------- APP SERVICES ----------------------------

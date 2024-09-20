@@ -18,6 +18,11 @@
     .button-tabs button {
       border-radius: 0px;
     }
+    .file-list {
+      x-tag {
+        margin-top: 10px;
+      }
+    }
     .canvas-container {
       width: 100%;
       .floating-controls {
@@ -59,6 +64,28 @@
       }
     }
     .image-drawing {
+      margin-top: 10px;
+      position: relative;
+      .annotation-container {
+        align-items: center;
+        position: absolute;
+        .buttons-container {
+          background: white;
+        }
+      }
+    }
+    .fake-prompt {
+      position: absolute;
+      background: white;
+      z-index: 9999;
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 2px 2px 10px #333;
+      margin-left: 25%;
+      margin-top: 10%;
+    }
+    .loading-bar {
+      width: 200px;
       margin-top: 10px;
     }
   }

@@ -12,6 +12,23 @@ def load_multispectral_image_bands(input_folder):
     bands = [io.imread(os.path.join(input_folder, band_file)) for band_file in band_files]
     return np.stack(bands, axis=0)
 
+def load_multispectral_image_bands_cropped(input_folder, cropDimensions):
+    """Load separate band images from the specified folder, crop them, and combine them into a single array."""
+    band_files = [f for f in os.listdir(input_folder) if f.endswith('.tif')]
+    band_files.sort()  # Ensure the bands are in the correct order
+    bands = []
+    for band_file in band_files:
+        single_image = io.imread(os.path.join(input_folder, band_file))
+        pixel_height = len(single_image)
+        pixel_width = len(single_image[0])
+        start_crop_x = round(pixel_width * cropDimensions[0][0])
+        start_crop_y = round(pixel_height * cropDimensions[0][1])
+        end_crop_x = round(pixel_width * cropDimensions[1][0])
+        end_crop_y = round(pixel_height * cropDimensions[1][1])
+        cropped_image = single_image[start_crop_y:end_crop_y, start_crop_x:end_crop_x]
+        bands.append(cropped_image)
+    return np.stack(bands, axis=0)
+
 def perform_pca(image):
     """Perform Principal Component Analysis (PCA) on the image."""
     pca = PCA(n_components=image.shape[0])
@@ -74,21 +91,18 @@ def save_image(image, output_folder, file_name, process_name):
     }
     return new_image;
 
-def process_images(input_folder, output_folder):
-    """Process all bands in the input folder as parts of a multispectral image."""
-    image = load_multispectral_image_bands(input_folder)
-
+def process_image(output_folder, image, name_prefix = ""):
     if image.shape[0] < 2:
         print("Not enough bands for certain operations.")
         return
 
     # Process and save each type of image
     processes = [
-        ('PCA', perform_pca),
-        ('ICA', perform_ica),
-        ('Ratio_B1_B2', lambda img: create_image_ratio(img, 0, 1)),
-        ('Gaussian_Blur', lambda img: apply_gaussian_blur(img[0], sigma=2)),
-        ('MNF', perform_mnf)
+        (name_prefix + 'PCA', perform_pca),
+        (name_prefix + 'ICA', perform_ica),
+        (name_prefix + 'Ratio_B1_B2', lambda img: create_image_ratio(img, 0, 1)),
+        (name_prefix + 'Gaussian_Blur', lambda img: apply_gaussian_blur(img[0], sigma=2)),
+        (name_prefix + 'MNF', perform_mnf)
     ]
 
     processed_images = []
@@ -99,3 +113,14 @@ def process_images(input_folder, output_folder):
         processed_images.append(new_image)
 
     return processed_images
+
+def process_images(input_folder, output_folder):
+    """Process all bands in the input folder as parts of a multispectral image."""
+    image = load_multispectral_image_bands(input_folder)
+    process_image(output_folder, image)
+
+def process_cropped_images(input_folder, output_folder, cropDimensions, name):
+    """Process all bands in the input folder as cropped parts of a multispectral image."""
+    image = load_multispectral_image_bands_cropped(input_folder, cropDimensions)
+    # name_prefix = ''.join(cropDimensions[0]).join(cropDimensions[1])
+    process_image(output_folder, image, name)
