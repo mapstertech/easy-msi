@@ -4,3 +4,5 @@ pyinstaller
 numpy
 skimage
 PIL
+sklearn
+rasterio

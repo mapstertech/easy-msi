@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import rasterio
-from matplotlib import pyplot
 from skimage import io, filters
 from sklearn.decomposition import PCA, FastICA
 
